@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- 2025-08-14: Code aus dem Tutorial https://www.youtube.com/watch?v=0n5u1Z01o9M -->
+    <!-- 2025-08-15: Sound und Schwierigkeitsgrad hinzugefügt, Code optimiert -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fang den Frosch! 🐸</title>
+    <meta
+      name="description"
+      content="Entwickelt als Teil eines Frontend-Entwickler-Portfolios: 'Fang den Frosch!' ist ein spannendes Reaktionsspiel, um die Geschicklichkeit des Spielers zu testen. Erlebe eine moderne, mobil-freundliche Webanwendung, die mit HTML, CSS und JavaScript umgesetzt wurde."
+    />
+    <style>
+      /*
+        ========================================
+        Grundlegendes Setup
+        ========================================
+        */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        font-family: "Roboto", sans-serif;
+        text-align: center;
+        background-color: #ffffff; /* Hintergrundfarbe auf Weiß gesetzt */
+        color: #0f1a27;
+        overflow-x: hidden; /* Verhindert horizontale Scrollbalken */
+      }
+
+      /*
+        ========================================
+        Typografie und Elemente
+        ========================================
+        */
+      #guess-info {
+        color: #c7a47a;
+        font-weight: bold;
+        margin-top: 10px;
+      }
+
+      button {
+        background-color: #427542;
+        color: #fff;
+        border: none;
+        padding: 12px 24px;
+        font-size: 1.1em;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s, transform 0.3s;
+      }
+
+      button:hover {
+        background-color: #213b21;
+        transform: translateY(-2px);
+      }
+
+      .btn {
+        background-color: #c7a47a;
+        color: #fff;
+        border: none;
+        padding: 12px 24px;
+        font-size: 1.1em;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s, transform 0.3s;
+      }
+
+      .btn:hover {
+        background-color: #a38361;
+        transform: translateY(-2px);
+      }
+
+      .btn-dark {
+        background-color: #0f1a27;
+        color: #fff;
+        border: none;
+        padding: 12px 24px;
+        font-size: 1.1em;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s, transform 0.3s;
+      }
+
+      .btn-dark:hover {
+        background-color: #192a3d;
+        transform: translateY(-2px);
+      }
+
+      /*
+        ========================================
+        Layout-Elemente
+        ========================================
+        */
+
+      /* Navigation */
+      .navbar {
+        background-color: #0f1a27;
+        padding: 15px 40px;
+      }
+
+      .navbar nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .nav-logo {
+        color: #fff;
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-decoration: none;
+        transition: text-decoration 0.3s;
+      }
+
+      .nav-logo:hover,
+      .nav-logo:active {
+        text-decoration: underline;
+      }
+
+      /* Hauptinhalt */
+      main {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: #ffffff;
+        padding: 2rem 0;
+        max-width: 1140px; /* Zentriert den Inhalt */
+        width: 100%;
+        margin: 0 auto;
+      }
+
+      /* Footer */
+      .footer {
+        background-color: #0f1a27;
+        color: #fff;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .footer-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .footer-content a {
+        color: #fff;
+        text-decoration: none;
+      }
+
+      /* --- Spezifische Styles für das Spiel --- */
+      h1 {
+        font-size: 2.5em;
+        color: #0f1a27;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      p {
+        font-size: 1.2em;
+        margin: 10px 0;
+        text-align: center;
+        color: #444;
+      }
+
+      #game-board {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        justify-content: center;
+        width: 330px;
+        max-width: 90%;
+        margin: 30px auto;
+        padding: 15px;
+        background-color: #e8e8e8;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .hole {
+        width: 100px;
+        height: 100px;
+        background-color: #486179;
+        border: 2px solid #182335;
+        border-radius: 50%;
+        font-size: 4em;
+        line-height: 100px;
+        cursor: pointer;
+        user-select: none;
+        transition: transform 0.2s, background-color 0.2s;
+      }
+
+      .hole:hover {
+        transform: scale(1.05);
+        background-color: #2f405c;
+      }
+
+      /* Nachrichten und Anzeigen */
+      #score,
+      #timer {
+        font-weight: bold;
+        font-size: 1.8em;
+      }
+
+      #end-message {
+        margin-top: 20px;
+        font-size: 2em;
+        color: #a83627;
+        font-weight: bold;
+      }
+
+      /* Schwierigkeitsgrad-Optionen */
+      .difficulty-options {
+        margin-top: 20px;
+        font-size: 1.1em;
+      }
+
+      .difficulty-options label {
+        margin: 0 10px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="navbar">
+      <nav>
+        <a href="../../index.html" class="nav-logo">Zurück zur Startseite</a>
+      </nav>
+    </header>
+    <main>
+      <h1>Fang den Frosch! 🐸</h1>
+
+      <p id="score">Punkte: 0</p>
+      <p id="timer">Zeit: 30s</p>
+
+      <div id="game-board">
+        <div class="hole" id="hole0" onclick="hit(0)"></div>
+        <div class="hole" id="hole1" onclick="hit(1)"></div>
+        <div class="hole" id="hole2" onclick="hit(2)"></div>
+        <div class="hole" id="hole3" onclick="hit(3)"></div>
+        <div class="hole" id="hole4" onclick="hit(4)"></div>
+        <div class="hole" id="hole5" onclick="hit(5)"></div>
+        <div class="hole" id="hole6" onclick="hit(6)"></div>
+        <div class="hole" id="hole7" onclick="hit(7)"></div>
+        <div class="hole" id="hole8" onclick="hit(8)"></div>
+      </div>
+
+      <div id="end-message"></div>
+
+      <p><button onclick="startGame()">Spiel starten</button></p>
+
+      <p>
+        Schwierigkeitsgrad:
+        <input
+          type="radio"
+          id="difficult-easy"
+          name="difficulty"
+          value="leicht"
+        />Leicht
+        <input
+          type="radio"
+          id="difficult-medium"
+          name="difficulty"
+          value="mittel"
+          checked
+        />Mittel
+        <input
+          type="radio"
+          id="difficult-heavy"
+          name="difficulty"
+          value="schwer"
+        />Schwer
+      </p>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <p>&copy; 2025 Frederik Anspach</p>
+        | <a href="impressum.html">Impressum</a>
+      </div>
+    </footer>
+
+    <script>
+      let currentFrog = -1;
+      let score = 0;
+      let timeLeft = 30;
+      let frogInterval;
+      let timerInterval;
+      let isGameActive = false; // Status für das Spiel
+
+      // Sound-Variablen
+      const hitSounds = [
+        new Audio("media/frog-hit.mp3"),
+        new Audio("media/frog-hit.mp3"),
+        new Audio("media/frog-hit.mp3"),
+        new Audio("media/frog-hit.mp3"),
+        new Audio("media/frog-hit.mp3"),
+      ];
+      let soundIndex = 0;
+      //const gameOverSound = new Audio('media/game_over.mp3');
+
+      // Zeiten für die Schwierigkeitsgrade
+      const difficultySettings = {
+        leicht: 2000,
+        mittel: 1000,
+        schwer: 600,
+      };
+
+      function startGame() {
+        // Verhindere, dass das Spiel gestartet wird, wenn es bereits aktiv ist
+        if (isGameActive) return;
+
+        isGameActive = true;
+        score = 0;
+        timeLeft = 30;
+        currentFrog = -1;
+
+        // Verstecke die Nachricht vom letzten Spiel
+        document.getElementById("end-message").textContent = "";
+
+        // Setze die Anzeige der Punkte und der Zeit auf zurück
+        document.getElementById("score").textContent = "Punkte: 0";
+        document.getElementById("timer").textContent = `Zeit: ${timeLeft}s`;
+
+        // Schwierigkeitsgrad abrufen
+        const intervalTimer = selectDifficult();
+
+        // Starte das Spiel mit Setzen der Intervalle
+        frogInterval = setInterval(showFrog, intervalTimer);
+        timerInterval = setInterval(updateTime, 1000); // 1 Sekunde für den Timer, wie besprochen
+      }
+
+      // Holt sich den Schwierigkeitsgrad aus den Radio-Inputs
+      function selectDifficult() {
+        const selectedRadio = document.querySelector(
+          'input[name="difficulty"]:checked'
+        );
+        return difficultySettings[selectedRadio.value];
+      }
+
+      // Setze den Frosch auf ein zufälliges Feld
+      function showFrog() {
+        // Verhindere, dass neue Frösche erscheinen, wenn das Spiel nicht aktiv ist
+        if (!isGameActive) return;
+
+        if (currentFrog !== -1) hideFrog();
+
+        currentFrog = Math.floor(Math.random() * 9);
+        document.getElementById("hole" + currentFrog).textContent = "🐸";
+      }
+
+      function hideFrog() {
+        if (currentFrog !== -1) {
+          document.getElementById("hole" + currentFrog).textContent = "";
+          currentFrog = -1; // Stelle sicher, dass der Frosch als "versteckt" markiert ist
+        }
+      }
+
+      // Überprüfe ob der Frosch getroffen wurde und zähle bei einem Treffer die Punkte hoch
+      function hit(index) {
+        // Nur Treffer zählen, wenn das Spiel aktiv ist
+        if (!isGameActive) return;
+
+        if (index === currentFrog) {
+          score++;
+          document.getElementById("score").textContent = `Punkte: ${score}`;
+          hideFrog();
+          // >> Hier den nächsten Sound im Array abspielen <<
+          hitSounds[soundIndex].play();
+          soundIndex = (soundIndex + 1) % hitSounds.length; // Wechselt zum nächsten Sound
+        }
+      }
+
+      // Lass die Zeit ablaufen und beende das Spiel mit Beenden der Intervalle
+      // Gib den Text für das Spielende aus
+      function updateTime() {
+        timeLeft--;
+        document.getElementById("timer").textContent = `Zeit: ${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+          // Spiel beenden
+          isGameActive = false;
+          clearInterval(frogInterval);
+          clearInterval(timerInterval);
+
+          // Setze den Frosch zurück
+          if (currentFrog !== -1) {
+            document.getElementById("hole" + currentFrog).textContent = "";
+          }
+          currentFrog = -1;
+
+          // Zeige die Endnachricht mit dem korrekten Endstand an
+          document.getElementById(
+            "end-message"
+          ).textContent = `Spiel vorbei! Du hast ${score} Punkte!`;
+        }
+      }
+    </script>
+  </body>
+</html>
