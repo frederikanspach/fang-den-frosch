@@ -163,11 +163,10 @@ p {
   grid-template-columns: repeat(3, 1fr);
   gap: 15px;
   justify-content: center;
-  width: 330px;
   max-width: 90%;
   margin: 30px auto;
   padding: 15px;
-  background-color: #e8e8e8;
+  background-color: #d2e2fc;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -220,12 +219,20 @@ p {
     font-size: 2rem;
   }
 
-  #score {
+  #score,
+  #timer {
     font-size: 1.2rem;
   }
 
-  #timer {
-    font-size: 1.2rem;
+  #game-board {
+    gap: 10px;
+  }
+
+  .hole {
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+    font-size: 3.2rem;
   }
 
   button {
