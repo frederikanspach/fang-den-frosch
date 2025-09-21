@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <!-- 2025-08-14: Code aus dem Tutorial https://www.youtube.com/watch?v=0n5u1Z01o9M -->
-    <!-- 2025-08-15: Sound und Schwierigkeitsgrad hinzugefügt, Code optimiert -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fang den Frosch! 🐸</title>
@@ -39,7 +37,6 @@
       <p><button onclick="startGame()">Spiel starten</button></p>
 
       <p>
-        Schwierigkeitsgrad:
         <input
           type="radio"
           id="difficult-easy"
@@ -67,14 +64,30 @@
     </footer>
 
     <script>
-      let currentFrog = -1;
       let score = 0;
       let timeLeft = 30;
       let frogInterval;
       let timerInterval;
       let isGameActive = false; // Status für das Spiel
+      let setHoles = [];
+      let cloverHoles = []; // Neues Array zur Speicherung der Kleeblatt-Löcher
 
-      // Sound-Variablen
+      const gameElements = [
+        { symbol: "🧜🏻‍♀️", name: "Meerjungfrau", points: 5, probability: 0.05 },
+        { symbol: "🐟", name: "Fisch", points: 2, probability: 0.05 },
+        { symbol: "🦆", name: "Ente", points: 2, probability: 0.05 },
+        { symbol: "🐸", name: "Frosch", points: 1, probability: 0.7 },
+        { symbol: "🐡", name: "Kugelfisch", points: -2, probability: 0.05 },
+        { symbol: "🦀", name: "Krebs", points: -2, probability: 0.05 },
+        { symbol: "🐊", name: "Krokodil", points: -5, probability: 0.05 },
+      ];
+      const fourLeafCloverSymbol = "🍀";
+      const cloverSymbol = "☘️";
+      const cloverProbability = 0.4;
+      const maxAdditionalCloves = 2;
+
+      let currentActiveElement = null;
+
       const hitSounds = [
         new Audio("media/frog-hit.mp3"),
         new Audio("media/frog-hit.mp3"),
@@ -83,40 +96,44 @@
         new Audio("media/frog-hit.mp3"),
       ];
       let soundIndex = 0;
-      //const gameOverSound = new Audio('media/game_over.mp3');
 
-      // Zeiten für die Schwierigkeitsgrade
       const difficultySettings = {
         leicht: 2000,
         mittel: 1000,
         schwer: 600,
       };
 
+      function getRandomElementByProbability() {
+        const rand = Math.random();
+        let cumulativeProbability = 0;
+        for (let i = 0; i < gameElements.length; i++) {
+          cumulativeProbability += gameElements[i].probability;
+          if (rand < cumulativeProbability) {
+            return gameElements[i];
+          }
+        }
+        return gameElements[Math.floor(Math.random() * gameElements.length)];
+      }
+
       function startGame() {
-        // Verhindere, dass das Spiel gestartet wird, wenn es bereits aktiv ist
         if (isGameActive) return;
 
         isGameActive = true;
         score = 0;
         timeLeft = 30;
-        currentFrog = -1;
+        currentActiveElement = null;
+        setHoles = [];
+        cloverHoles = []; // Leere auch das neue Array
 
-        // Verstecke die Nachricht vom letzten Spiel
         document.getElementById("end-message").textContent = "";
-
-        // Setze die Anzeige der Punkte und der Zeit auf zurück
         document.getElementById("score").textContent = "Punkte: 0";
         document.getElementById("timer").textContent = `Zeit: ${timeLeft}s`;
 
-        // Schwierigkeitsgrad abrufen
         const intervalTimer = selectDifficult();
-
-        // Starte das Spiel mit Setzen der Intervalle
-        frogInterval = setInterval(showFrog, intervalTimer);
-        timerInterval = setInterval(updateTime, 1000); // 1 Sekunde für den Timer, wie besprochen
+        frogInterval = setInterval(showElements, intervalTimer);
+        timerInterval = setInterval(updateTime, 1000);
       }
 
-      // Holt sich den Schwierigkeitsgrad aus den Radio-Inputs
       function selectDifficult() {
         const selectedRadio = document.querySelector(
           'input[name="difficulty"]:checked'
@@ -124,58 +141,100 @@
         return difficultySettings[selectedRadio.value];
       }
 
-      // Setze den Frosch auf ein zufälliges Feld
-      function showFrog() {
-        // Verhindere, dass neue Frösche erscheinen, wenn das Spiel nicht aktiv ist
+      function showElements() {
         if (!isGameActive) return;
 
-        if (currentFrog !== -1) hideFrog();
+        // Leere alle vorherigen Löcher
+        hideElement();
 
-        currentFrog = Math.floor(Math.random() * 9);
-        document.getElementById("hole" + currentFrog).textContent = "🐸";
-      }
+        // Schritt 1: Haupt-Element platzieren
+        let availableHoles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
-      function hideFrog() {
-        if (currentFrog !== -1) {
-          document.getElementById("hole" + currentFrog).textContent = "";
-          currentFrog = -1; // Stelle sicher, dass der Frosch als "versteckt" markiert ist
+        const mainHoleIndexInAvailable = Math.floor(
+          Math.random() * availableHoles.length
+        );
+        const mainHole = availableHoles[mainHoleIndexInAvailable];
+        availableHoles.splice(mainHoleIndexInAvailable, 1);
+
+        const selectedElement = getRandomElementByProbability();
+        currentActiveElement = { ...selectedElement, hole: mainHole };
+        setHoles.push(mainHole); // Füge das Haupt-Loch zu setHoles hinzu
+
+        document.getElementById("hole" + mainHole).textContent =
+          selectedElement.symbol;
+
+        // Schritt 2: Kleeblätter auf zufällige freie Felder verteilen
+        let numClovesToAdd = 0;
+        if (Math.random() < cloverProbability) {
+          numClovesToAdd = Math.floor(
+            Math.random() * (maxAdditionalCloves + 1)
+          );
+        }
+
+        for (let i = 0; i < numClovesToAdd; i++) {
+          if (availableHoles.length > 0) {
+            const randomHoleIndexInAvailable = Math.floor(
+              Math.random() * availableHoles.length
+            );
+            const cloverHole = availableHoles[randomHoleIndexInAvailable];
+
+            const cloverSymbolToUse =
+              Math.random() < 0.5 ? fourLeafCloverSymbol : cloverSymbol;
+            document.getElementById("hole" + cloverHole).textContent =
+              cloverSymbolToUse;
+
+            cloverHoles.push(cloverHole); // Füge das Kleeblatt-Loch zum neuen Array hinzu
+            availableHoles.splice(randomHoleIndexInAvailable, 1);
+          }
         }
       }
 
-      // Überprüfe ob der Frosch getroffen wurde und zähle bei einem Treffer die Punkte hoch
+      function hideElement() {
+        // Leere das Haupt-Element
+        if (currentActiveElement) {
+          document.getElementById(
+            "hole" + currentActiveElement.hole
+          ).textContent = "";
+        }
+        currentActiveElement = null;
+
+        // Leere alle Kleeblätter
+        for (const hole of cloverHoles) {
+          document.getElementById("hole" + hole).textContent = "";
+        }
+        cloverHoles = [];
+      }
+
       function hit(index) {
-        // Nur Treffer zählen, wenn das Spiel aktiv ist
         if (!isGameActive) return;
 
-        if (index === currentFrog) {
-          score++;
+        // Prüfe, ob das Haupt-Element getroffen wurde
+        if (currentActiveElement && index === currentActiveElement.hole) {
+          score += currentActiveElement.points;
           document.getElementById("score").textContent = `Punkte: ${score}`;
-          hideFrog();
-          // >> Hier den nächsten Sound im Array abspielen <<
+          hideElement();
           hitSounds[soundIndex].play();
-          soundIndex = (soundIndex + 1) % hitSounds.length; // Wechselt zum nächsten Sound
+          soundIndex = (soundIndex + 1) % hitSounds.length;
+        }
+        // Ansonsten: Prüfe, ob ein Kleeblatt getroffen wurde
+        else if (cloverHoles.includes(index)) {
+          hideElement();
+          hitSounds[soundIndex].play();
+          soundIndex = (soundIndex + 1) % hitSounds.length;
         }
       }
 
-      // Lass die Zeit ablaufen und beende das Spiel mit Beenden der Intervalle
-      // Gib den Text für das Spielende aus
       function updateTime() {
         timeLeft--;
         document.getElementById("timer").textContent = `Zeit: ${timeLeft}s`;
 
         if (timeLeft <= 0) {
-          // Spiel beenden
           isGameActive = false;
           clearInterval(frogInterval);
           clearInterval(timerInterval);
 
-          // Setze den Frosch zurück
-          if (currentFrog !== -1) {
-            document.getElementById("hole" + currentFrog).textContent = "";
-          }
-          currentFrog = -1;
+          hideElement();
 
-          // Zeige die Endnachricht mit dem korrekten Endstand an
           document.getElementById(
             "end-message"
           ).textContent = `Spiel vorbei! Du hast ${score} Punkte!`;
