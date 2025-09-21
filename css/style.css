@@ -1,8 +1,4 @@
-/*
-        ========================================
-        Grundlegendes Setup
-        ========================================
-        */
+/* CSS für Fang den Frosch */
 * {
   margin: 0;
   padding: 0;
@@ -20,96 +16,22 @@ body {
   overflow-x: hidden;
 }
 
-/*
-        ========================================
-        Typografie und Elemente
-        ========================================
-        */
-#guess-info {
-  color: #c7a47a;
-  font-weight: bold;
-  margin-top: 10px;
-}
-
 button {
-  background-color: #427542;
+  background-color: #7a9052;
   color: #fff;
   border: none;
   padding: 12px 24px;
   font-size: 1.1em;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 10px;
   transition: background-color 0.3s, transform 0.3s;
 }
 
 button:hover {
-  background-color: #213b21;
+  background-color: #505f35;
   transform: translateY(-2px);
 }
 
-.btn {
-  background-color: #c7a47a;
-  color: #fff;
-  border: none;
-  padding: 12px 24px;
-  font-size: 1.1em;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s, transform 0.3s;
-}
-
-.btn:hover {
-  background-color: #a38361;
-  transform: translateY(-2px);
-}
-
-.btn-dark {
-  background-color: #0f1a27;
-  color: #fff;
-  border: none;
-  padding: 12px 24px;
-  font-size: 1.1em;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s, transform 0.3s;
-}
-
-.btn-dark:hover {
-  background-color: #192a3d;
-  transform: translateY(-2px);
-}
-
-/*
-        ========================================
-        Layout-Elemente
-        ========================================
-        */
-
-/* Navigation */
-.navbar {
-  background-color: #0f1a27;
-  padding: 15px 40px;
-}
-
-.navbar nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.nav-logo {
-  color: #fff;
-  font-size: 1.2rem;
-  font-weight: bold;
-  text-decoration: none;
-  transition: text-decoration 0.3s;
-}
-
-.nav-logo:hover,
-.nav-logo:active {
-  text-decoration: underline;
-}
-
-/* Hauptinhalt */
 main {
   flex-grow: 1;
   display: flex;
@@ -123,7 +45,6 @@ main {
   margin: 0 auto;
 }
 
-/* Footer */
 .footer {
   background-color: #0f1a27;
   color: #fff;
@@ -158,24 +79,30 @@ p {
   color: #444;
 }
 
+.teich {
+  background-image: url(../img/teich-01.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  /* padding: 100px; */
+  border-radius: 15%;
+}
+
 #game-board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 15px;
   justify-content: center;
   max-width: 90%;
-  margin: 30px auto;
+  /* margin: 30px auto; */
+  margin: 90px;
   padding: 15px;
-  background-color: #d2e2fc;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .hole {
   width: 100px;
   height: 100px;
-  background-color: #486179;
-  border: 2px solid #182335;
   border-radius: 50%;
   font-size: 4em;
   line-height: 100px;
@@ -184,14 +111,16 @@ p {
   transition: transform 0.2s, background-color 0.2s;
 }
 
-.hole:hover {
-  transform: scale(1.05);
-  background-color: #2f405c;
+/* Nachrichten und Anzeigen */
+
+.game-info {
+  display: flex;
+  justify-content: space-evenly;
 }
 
-/* Nachrichten und Anzeigen */
 #score,
 #timer {
+  color: #fff;
   font-weight: bold;
   font-size: 1.8em;
 }
